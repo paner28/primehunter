@@ -1,0 +1,255 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <script type="text/javascript" src="../brython.js"></script>
+        <script type="text/javascript" src="../brython_stdlib.js"></script>
+        <link rel="stylesheet" href="css/style.css">
+        <title>practice</title>
+        <style>
+            body{
+                margin: 0;
+            }
+            .head{
+                background-color: skyblue;
+                text-align: center;
+                margin: 0;
+                /* padding: 70px; */
+                user-select: none;
+                font-size: 800%;
+            }
+            .headchild{
+                background-color: skyblue;
+                text-align: center;
+                margin: 0;
+                overflow-wrap: break-word;
+                user-select: none;
+            }
+            #parent{
+                background-color: #efefef;
+                overflow-wrap: break-word;
+                min-height: 370px;
+            }
+            .bar{
+                margin-left: 5px;
+            }
+            .button{
+                font-size: 180%;
+                border-radius: 8px;
+                width: 200px;
+                font-weight: bold;
+                text-align: center;
+                padding: 10px;
+                color: white;
+                background-color: dodgerblue;
+                text-overflow: clip;
+                margin: auto;
+                margin-top: 30px;
+                margin-bottom: 10px;
+                cursor: pointer;
+                user-select: none;
+            }
+        </style>
+    </head>
+    
+    <body onload="brython(1)">
+        <script type="text/python">
+        from browser import document,html,alert
+        import random
+
+        def is_prime(q,k=50):
+            q = abs(q)
+            if q == 2: return True
+            if q < 2 or q&1 == 0: return False
+            d = (q-1)>>1
+            while d&1 == 0:
+                d >>= 1
+            for i in range(k):
+                a = random.randint(1,q-1)
+                t = d
+                y = pow(a,t,q)
+                while t != q-1 and y != 1 and y != q-1: 
+                    y = pow(y,2,q)
+                    t <<= 1
+                if y != q-1 and t&1 == 0:
+                    return False
+            return True
+
+        parent = document.getElementById("parent")
+
+        def fx(n):
+            global nl
+            global p
+            global pc
+            global num
+            global pl
+            global pal
+            for i in range(n):
+                if nl[i] == 14:
+                    nl[i] = -1
+                    for j in range(1,14):
+                        num[i] = j
+                        fx(n)
+                    nl[i] = 14
+                    return
+                elif nl[i] == -1:
+                    continue
+                else:
+                    num[i] = nl[i]
+            p = 0
+            for i in range(n):
+                if num[i] < 10:
+                    p *= 10
+                else:
+                    p *= 100
+                p += num[i]
+            if p > kmin and p < kmax and is_prime(p) == True:
+                pl.append(p)
+                ad(n)
+                pc += 1
+                return
+
+        def ad(n):
+            global pa
+            global pal
+            global pc
+            pa.clear()
+            for i in range(n):
+                if num[i] == 10:
+                    pa += 'T'
+                elif num[i] == 11:
+                    pa += 'J'
+                elif num[i] == 12:
+                    pa += 'Q'
+                elif num[i] == 13:
+                    pa += 'K'
+                else:
+                    pa += str(num[i])
+            v = ''.join(pa)
+            pal.append(v)
+
+        def judge(ev):
+            nl = []
+            num = [-3] * 100
+            global nl
+            global num
+            pc = 0
+            pl = []
+            pa = ['0']
+            global pc
+            global pl
+            global pal
+            global pa
+            pal = []
+            kmin = 0
+            kmax = 10**15
+            global kmin
+            global kmax
+            jflag = False
+            mflag = [0] * 100000
+            maisuu = [[0] * 13 for i in range(100000)]
+
+            k = input("半角で整数を入力してください")
+            
+            nl = list(k)
+            nl = [10 if i == "t" else i for i in nl]
+            nl = [11 if i == "j" else i for i in nl]
+            nl = [12 if i == "q" else i for i in nl]
+            nl = [13 if i == "k" else i for i in nl]
+            nl = [14 if i == "x" else i for i in nl]
+            try:
+                nl = [int(i) for i in nl]
+            except:
+                alert("無効な入力です")
+            
+            if 14 in nl:
+                jflag = True
+                kn = input("桁数を入力してください")
+                if int(kn) != 0:
+                        kmax = 10**(int(kn))
+                        kmin = 10**(int(kn)-1)
+                t = len(nl)
+                fx(t)
+
+                for i in range(pc):
+                    for j in range(i+1,pc):
+                        if pl[i]>pl[j]:
+                            pl[i],pl[j] = pl[j],pl[i]
+                            y = pal[i]
+                            pal[i] = pal[j]
+                            pal[j] = y
+                for i in range(pc):
+                    for j in range(t):
+                        if pal[i][j] == '1':
+                            maisuu[i][0] += 1
+                        elif pal[i][j] == '2':
+                            maisuu[i][1] += 1
+                        elif pal[i][j] == '3':
+                            maisuu[i][2] += 1
+                        elif pal[i][j] == '4':
+                            maisuu[i][3] += 1
+                        elif pal[i][j] == '5':
+                            maisuu[i][4] += 1
+                        elif pal[i][j] == '6':
+                            maisuu[i][5] += 1
+                        elif pal[i][j] == '7':
+                            maisuu[i][6] += 1
+                        elif pal[i][j] == '8':
+                            maisuu[i][7] += 1
+                        elif pal[i][j] == '9':
+                            maisuu[i][8] += 1
+                        elif pal[i][j] == 'T':
+                            maisuu[i][9] += 1
+                        elif pal[i][j] == 'J':
+                            maisuu[i][10] += 1
+                        elif pal[i][j] == 'Q':
+                            maisuu[i][11] += 1
+                        elif pal[i][j] == 'K':
+                            maisuu[i][12] += 1
+                    for j in range(13):
+                        if maisuu[i][j] > 4:
+                            mflag[i] = 1
+                for i in range(pc-2,1,-1):
+                    if mflag[i] == 0:
+                        for j in range(i+1,pc):
+                            if maisuu[i] == maisuu[j]:
+                                mflag[i] = 1
+
+                for i in range(len(pl)):
+                    elt = document.createElement("div")
+                    elt <= str(pl[i]) + "は素数です"
+                    parent.appendChild(elt)
+            
+            if jflag is False:
+                p = 0
+                for i in range(len(nl)):
+                    if nl[i] < 10:
+                        p *= 10
+                    else:
+                        p *= 100
+                    p += nl[i]
+                if is_prime(p):
+                    elt = document.createElement("div")
+                    elt <= str(p) + "は素数です"
+                    parent.appendChild(elt)
+                elif p == 0:
+                    alert("無効な入力です")
+                else:
+                    elt = document.createElement("div")
+                    elt <= str(p) + "は素数ではありません"
+                    parent.appendChild(elt)
+        
+        document["button"].addEventListener("click", judge)
+
+        </script>
+
+        <h1 class="head">Prime hunter</h1>
+        <p class="headchild">start!ボタンを押して、半角で数字を入力すると、素数かどうか判定できます！ tは10、jは11、qは12、kは13、xはJokerとして入力できます。 <b>自分の好きな素数に出会いましょう！</b></p>
+        <p class="headchild">※xを入力すると出力する素数の桁数を指定できます</p>
+
+        <div id="button" class="button">start!</div>
+
+        <h1 class="bar"><b>結果一覧</b></h1>
+        <div id="parent"></div>
+    </body>
+</html>
