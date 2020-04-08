@@ -6,7 +6,7 @@
         <script type="text/javascript" src="brython.js"></script>
         <script type="text/javascript" src="brython_stdlib.js"></script>
         <link rel="stylesheet" href="css/style.css">
-        <title>practice</title>
+        <title>Prime Hunter</title>
         <style>
             body{
                 margin: 0;
@@ -26,30 +26,106 @@
                 overflow-wrap: break-word;
                 user-select: none;
             }
+
+            table{
+                margin:auto;
+                margin-top: 20px;
+                background-color: silver;
+                padding: 10px 10px 10px 10px;
+                border-radius: 10px;
+            }
+            td{
+                background-color: rgb(232, 234, 255);
+                padding: 10px 10px 10px 10px;
+                border-radius: 6px;
+                text-align: center;
+                font-size: 30px;
+                user-select: none;
+                width: 35px;
+                height: 55px;
+            }
+            td:hover{
+                opacity: 0.85;
+            }
+            #result{
+                background-color: white;
+                text-align: right;
+                font-weight: normal;
+                user-select: none;
+                font-size: 30px;
+                padding: 10px 10px 10px 10px;
+                height: 50px;
+            }
+            
             #parent{
                 background-color: #efefef;
                 overflow-wrap: break-word;
-                min-height: 370px;
+                min-height: 100px;
             }
             .bar{
                 margin-left: 5px;
+                user-select: none;
             }
+
             .button{
-                font-size: 180%;
                 border-radius: 8px;
-                width: 200px;
-                font-weight: bold;
+                width: 70pxpx;
+                padding: 6px;
+                font-weight: normal;
+                font-size: 24px;
                 text-align: center;
-                padding: 10px;
                 color: white;
                 background-color: dodgerblue;
-                text-overflow: clip;
-                margin: auto;
-                margin-top: 30px;
-                margin-bottom: 10px;
                 cursor: pointer;
                 user-select: none;
             }
+
+            .caution{
+                color: red;
+            }
+            .tooltip1{
+                position: relative;
+            }
+            .tooltip1 span {
+                display: none;
+                transition: all 2s 0s ease;
+            }
+            .tooltip1:hover {
+                position: relative;
+                z-index: 3;
+            }
+            .tooltip1:hover span {
+                padding: 5px;
+                display: block;
+                animation: show 0.6s linear 0s;
+                position: absolute;
+                top: auto;
+                left: 10px;
+                color: #fff;
+                background-color: #51A2C1;
+                width: 195px;
+                border-radius:3px;
+            }
+            .tooltip1 span:before{
+                content:''; 
+                display:block; 
+                position:absolute;
+                height:0; 
+                width:0; 
+                top:-15px; 
+                left:15px;
+                border:13px transparent solid; 
+                border-right-width:0; 
+                border-left-color:#51A2C1; 
+                transform:rotate(270deg);
+                -webkit-transform:rotate(270deg);
+                -o-transform:rotate(270deg);
+            }
+            .tooltip2:hover span{
+                left: 10px;
+                width: 330px;
+            }
+
             @media screen and (max-width: 896px){
                 .head{
                     font-size: 450%;
@@ -72,25 +148,33 @@
         from browser import document,html,alert
         import random
 
-        def is_prime(q,k=50):
-            q = abs(q)
-            if q == 2: return True
-            if q < 2 or q&1 == 0: return False
-            d = (q-1)>>1
-            while d&1 == 0:
-                d >>= 1
-            for i in range(k):
-                a = random.randint(1,q-1)
-                t = d
-                y = pow(a,t,q)
-                while t != q-1 and y != 1 and y != q-1: 
-                    y = pow(y,2,q)
-                    t <<= 1
-                if y != q-1 and t&1 == 0:
+        def is_prime(n):
+            if n <= 1:
+                return False
+            k = 0
+            m = n - 1
+            while m & 1 == 0:
+                k += 1
+                m >>= 1
+            assert(2**k * m == n - 1)
+
+            def trial(n):
+                a = random.randint(2, n - 1)
+                b = pow(a, m, n)
+                if b == 1:
+                    return True
+                for i in range(0, k):
+                    if b == n - 1:
+                        return True
+                    b = pow(b, 2, n)
+                return False
+            for i in range(10):
+                if not trial(n):
                     return False
             return True
 
         parent = document.getElementById("parent")
+        result = document.getElementById("result")
 
         def fx(n):
             global nl
@@ -102,9 +186,14 @@
             for i in range(n):
                 if nl[i] == 14:
                     nl[i] = -1
-                    for j in range(1,14):
-                        num[i] = j
-                        fx(n)
+                    if i==0:
+                        for j in range(1,14):
+                            num[i] = j
+                            fx(n)
+                    else:
+                        for j in range(0,14):
+                            num[i] = j
+                            fx(n)
                     nl[i] = 14
                     return
                 elif nl[i] == -1:
@@ -143,6 +232,72 @@
             v = ''.join(pa)
             pal.append(v)
 
+        def adc(n):
+            global pa
+            global pal
+            global pc
+            v = []
+            global v
+            pa.clear()
+            for i in range(n):
+                if num[i] == 10:
+                    pa += 'T'
+                elif num[i] == 11:
+                    pa += 'J'
+                elif num[i] == 12:
+                    pa += 'Q'
+                elif num[i] == 13:
+                    pa += 'K'
+                else:
+                    pa += str(num[i])
+            pa = [i for i in pa if not i == '0']
+            v = ''.join(pa)
+            return v
+
+        def fxa(n):
+            global k
+            global p
+            global pc
+            global num
+            global pl
+            global pal
+            for i in range(n):
+                if nl[i] == 14:
+                    nl[i] = -1
+                    if i == 0:
+                        for j in range(1,14):
+                            num[i] = j
+                            fxa(n)
+                    else:
+                        for j in range(0,14):
+                            num[i] = j
+                            fxa(n)
+                    nl[i] = 14
+                    return
+                elif nl[i] == -1:
+                    continue
+                elif nl[i] == -2:
+                    num[i] = 'a'
+                else:
+                    num[i] = nl[i]
+            num = [i for i in num if not i == -3]
+            p = map(str, num)
+            p = ''.join(p)
+            for i in an:
+                kp = p
+                kp = kp.replace('a',str(i))
+                kp = int(kp)
+                if kp > kmax or kp <kmin:
+                    return
+                if is_prime(kp) == False:
+                    return
+            adc(n)
+
+            elt = document.createElement("div")
+            elt <= str(v) + "は素数です"
+            parent.appendChild(elt)
+            return
+
         def judge(ev):
             nl = []
             num = [-3] * 100
@@ -156,86 +311,63 @@
             global pal
             global pa
             pal = []
+            an = []
+            global an
             kmin = 0
             kmax = 10**15
             global kmin
             global kmax
             jflag = False
+            aflag = False
             mflag = [0] * 100000
             maisuu = [[0] * 13 for i in range(100000)]
 
-            k = input("半角で整数を入力してください")
+            k = result.text
             
             nl = list(k)
-            nl = [10 if i == "t" else i for i in nl]
-            nl = [11 if i == "j" else i for i in nl]
-            nl = [12 if i == "q" else i for i in nl]
-            nl = [13 if i == "k" else i for i in nl]
+            nl = [10 if i == "T" else i for i in nl]
+            nl = [11 if i == "J" else i for i in nl]
+            nl = [12 if i == "Q" else i for i in nl]
+            nl = [13 if i == "K" else i for i in nl]
             nl = [14 if i == "x" else i for i in nl]
+            nl = [-2 if i == "a" else i for i in nl]
             try:
                 nl = [int(i) for i in nl]
             except:
                 alert("無効な入力です")
+            t = len(nl)
             
+            if -2 in nl:
+                aflag = True
+                an = input("aになりうる数を半角,区切りで入力してください(数字のみ対応)").split(",")
+                try:
+                    an = [int(i) for i in an]
+                except:
+                    alert("無効な入力です")
+                an.sort()
+
+                for i in range(len(an)):
+                    if i == 0:
+                        elt = document.createElement("span")
+                        elt <= "a=" + str(an[i]) + ","
+                    elif i == len(an)-1:
+                        elt = document.createElement("span")
+                        elt <= str(an[i]) 
+                    else:
+                        elt = document.createElement("span")
+                        elt <= str(an[i]) + ","
+                    parent.appendChild(elt)
+                fxa(t)
+                
             if 14 in nl:
                 jflag = True
-                kn = input("桁数を入力してください")
+                kn = input("半角で桁数を入力してください")
                 if int(kn) != 0:
                         kmax = 10**(int(kn))
                         kmin = 10**(int(kn)-1)
-                t = len(nl)
                 fx(t)
 
-                for i in range(pc):
-                    for j in range(i+1,pc):
-                        if pl[i]>pl[j]:
-                            pl[i],pl[j] = pl[j],pl[i]
-                            y = pal[i]
-                            pal[i] = pal[j]
-                            pal[j] = y
-                for i in range(pc):
-                    for j in range(t):
-                        if pal[i][j] == '1':
-                            maisuu[i][0] += 1
-                        elif pal[i][j] == '2':
-                            maisuu[i][1] += 1
-                        elif pal[i][j] == '3':
-                            maisuu[i][2] += 1
-                        elif pal[i][j] == '4':
-                            maisuu[i][3] += 1
-                        elif pal[i][j] == '5':
-                            maisuu[i][4] += 1
-                        elif pal[i][j] == '6':
-                            maisuu[i][5] += 1
-                        elif pal[i][j] == '7':
-                            maisuu[i][6] += 1
-                        elif pal[i][j] == '8':
-                            maisuu[i][7] += 1
-                        elif pal[i][j] == '9':
-                            maisuu[i][8] += 1
-                        elif pal[i][j] == 'T':
-                            maisuu[i][9] += 1
-                        elif pal[i][j] == 'J':
-                            maisuu[i][10] += 1
-                        elif pal[i][j] == 'Q':
-                            maisuu[i][11] += 1
-                        elif pal[i][j] == 'K':
-                            maisuu[i][12] += 1
-                    for j in range(13):
-                        if maisuu[i][j] > 4:
-                            mflag[i] = 1
-                for i in range(pc-2,1,-1):
-                    if mflag[i] == 0:
-                        for j in range(i+1,pc):
-                            if maisuu[i] == maisuu[j]:
-                                mflag[i] = 1
-
-                for i in range(len(pl)):
-                    elt = document.createElement("div")
-                    elt <= str(pl[i]) + "は素数です"
-                    parent.appendChild(elt)
-            
-            if jflag is False:
+            if jflag is False and aflag is False:
                 p = 0
                 for i in range(len(nl)):
                     if nl[i] < 10:
@@ -253,18 +385,147 @@
                     elt = document.createElement("div")
                     elt <= str(p) + "は素数ではありません"
                     parent.appendChild(elt)
+
+            for i in range(pc):
+                for j in range(i+1,pc):
+                    if pl[i]>pl[j]:
+                        pl[i],pl[j] = pl[j],pl[i]
+                        y = pal[i]
+                        pal[i] = pal[j]
+                        pal[j] = y
+            for i in range(pc):
+                for j in range(t):
+                    if pal[i][j] == '1':
+                        maisuu[i][0] += 1
+                    elif pal[i][j] == '2':
+                        maisuu[i][1] += 1
+                    elif pal[i][j] == '3':
+                        maisuu[i][2] += 1
+                    elif pal[i][j] == '4':
+                        maisuu[i][3] += 1
+                    elif pal[i][j] == '5':
+                        maisuu[i][4] += 1
+                    elif pal[i][j] == '6':
+                        maisuu[i][5] += 1
+                    elif pal[i][j] == '7':
+                        maisuu[i][6] += 1
+                    elif pal[i][j] == '8':
+                        maisuu[i][7] += 1
+                    elif pal[i][j] == '9':
+                        maisuu[i][8] += 1
+                    elif pal[i][j] == 'T':
+                        maisuu[i][9] += 1
+                    elif pal[i][j] == 'J':
+                        maisuu[i][10] += 1
+                    elif pal[i][j] == 'Q':
+                        maisuu[i][11] += 1
+                    elif pal[i][j] == 'K':
+                        maisuu[i][12] += 1
+                for j in range(13):
+                    if maisuu[i][j] > 4:
+                        mflag[i] = 1
+            for i in range(pc-2,1,-1):
+                if mflag[i] == 0:
+                    for j in range(i+1,pc):
+                        if maisuu[i] == maisuu[j]:
+                            mflag[i] = 1
+
+            for i in range(len(pl)):
+                elt = document.createElement("div")
+                elt <= str(pl[i]) + "は素数です"
+                parent.appendChild(elt)
+            
         
-        document["button"].addEventListener("click", judge)
+        document["judge"].addEventListener("click", judge)
+        
+        def action(event):
+            element = event.target
+            value = element.text
+            if value not in "=BC判定":
+                if result.text in ["0", "error"]:
+                    result.text = value
+                else:
+                    result.text = result.text + value
+            elif value == "判定":
+                result.text = "0"
+            elif value == "C":
+                result.text = "0"
+            elif value == "B":
+                text = result.text[:-1]
+                result.text = text
+                if len(text) == 0:
+                    result.text = "0"
+            elif value == "=":
+                try:
+                    result.text = eval(result.text)
+                except:
+                    result.text = "error"
+
+        for button in document.select("td"):
+            button.bind("click", action)
+
+        def clear(event):
+            element = document.getElementById("parent");
+            while (element.firstChild):
+                element.removeChild(element.firstChild);
+
+        document["button"].addEventListener("click", clear)
 
         </script>
 
         <h1 class="head">Prime hunter</h1>
-        <p class="headchild">start!ボタンを押して、半角で数字を入力すると、素数かどうか判定できます！　tは10、jは11、qは12、kは13、xはJokerとして入力できます。　<b>自分の好きな素数に出会いましょう！</b></p>
-        <p class="headchild">※xを入力すると出力する素数の桁数を指定できます(0は全探索)</p>
+        <div>
+            <p class="headchild">電卓のボタンを押して数字を入力し、判定を押すことで素数かどうか判定できます！</p>
+            <p class="headchild">tは10、jは11、qは12、kは13、xはJokerとして入力できます。</p>
+            <p class="headchild"><b>自分の好きな素数に出会いましょう！</b></p>
+            <p class="headchild">
+                <span class="tooltip1 headchild tooltip2">ルールの詳細を確認
+                    <span>Cでクリア。Bで1文字削除<br>aは半角数字カンマ区切りで入力することで、そのカードになりうる数を指定</span>
+                </span>
+                <span class="tooltip1 headchild caution">caution!
+                    <span>xを入力すると出力する素数の桁数を指定できます。<br>10ケタを超えると判定がバグりやすくなります</span>
+                </span>
+            </p>
+        </div>
 
-        <div id="button" class="button">start!</div>
+        <table>
+            <tr>
+                <th id="result" colspan="5">0</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>2</td>
+                <td>3</td>
+                <td>T</td>
+                <td>C</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>5</td>
+                <td>6</td>
+                <td>J</td>
+                <td>B</td>
+            </tr>
+            <tr>
+                <td>7</td>
+                <td>8</td>
+                <td>9</td>
+                <td>Q</td>
+                <td rowspan="2" id="judge">判定</td>
+            </tr>
+            <tr>
+                <td>0</td>
+                <td>x</td>
+                <td>a</td>
+                <td>K</td>
+            </tr>
+        </table>
+        
+        <h1 class="bar">
+            <b>結果一覧</b>
+            <a id="button" class="button">クリア</a>
+        </h1>
 
-        <h1 class="bar"><b>結果一覧</b></h1>
         <div id="parent"></div>
     </body>
 </html>
